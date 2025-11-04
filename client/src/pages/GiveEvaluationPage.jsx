@@ -131,9 +131,9 @@ export default function GiveEvaluationPage() {
             />
             Submit anonymously
           </label>
-          <p className="anon-hint">
+          {/* <p className="anon-hint">
             (Note: Instructors' evaluations are always visible to students.)
-          </p>
+          </p> */}
 
           <div className="buttons">
             <button className="submit-btn" onClick={submitEvaluation}>

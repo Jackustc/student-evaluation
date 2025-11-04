@@ -257,8 +257,8 @@ export default function EvaluationPage() {
             <table className="eval-table">
               <thead>
                 <tr>
-                  <th>Evaluator</th>
-                  <th>Evaluatee</th>
+                  <th>Giver</th>
+                  <th>Receiver</th>
                   <th>Score</th>
                   <th>Comment</th>
                   <th>Date</th>
