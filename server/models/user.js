@@ -34,6 +34,11 @@ module.exports = (sequelize, DataTypes) => {
       as: "RequestsReceived",
       foreignKey: "requesteeId",
     });
+    // ✅ 新增：用户与点赞的关系
+    User.hasMany(models.EvaluationLike, {
+      foreignKey: "userId",
+      onDelete: "CASCADE",
+    });
   };
 
   return User;

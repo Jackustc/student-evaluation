@@ -15,6 +15,10 @@ module.exports = (sequelize, DataTypes) => {
       as: "evaluatee",
       foreignKey: "evaluateeId",
     });
+    Evaluation.hasMany(models.EvaluationLike, {
+      foreignKey: "evaluationId",
+      onDelete: "CASCADE",
+    });
   };
 
   return Evaluation;

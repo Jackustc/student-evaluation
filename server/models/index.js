@@ -25,6 +25,7 @@ const modelFiles = [
   "team",
   "teamMembership",
   "evaluation",
+  "evaluationLike",
   "evaluationRequest",
   "notification",
 ];
