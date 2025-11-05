@@ -33,7 +33,7 @@ export default function RequestEvaluationPage() {
   const sendRequest = async (studentId) => {
     try {
       setLoadingId(studentId);
-      const res = await api.post(`/courses/${id}/evaluation-requests`, {
+      const res = await api.post(`/courses/${id}/request-student-evaluation`, {
         requestee_id: studentId,
       });
       if (res.data.message?.includes("already pending")) {

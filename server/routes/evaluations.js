@@ -209,29 +209,71 @@ router.post("/courses/:courseId/evaluations", requireAuth, async (req, res) => {
     if (!evaluatee)
       return res.status(404).json({ error: "Evaluatee not found" });
 
-    // ✅ 权限：老师或课程 instructor 才能跨组打分
+    // // ✅ 权限：老师或课程 instructor 才能跨组打分
+    // if (
+    //   evaluator.role !== "instructor" ||
+    //   course.instructorId !== evaluatorId
+    // ) {
+    //   return res
+    //     .status(403)
+    //     .json({ error: "Only course instructor can evaluate students." });
+    // }
+    // ✅ 权限：允许两种情况：
+    // 1. 老师给学生打分（跨组）
+    // 2. 学生给老师打分（课程层反馈）
     if (
-      evaluator.role !== "instructor" ||
-      course.instructorId !== evaluatorId
+      !(
+        (evaluator.role === "instructor" &&
+          course.instructorId === evaluatorId) ||
+        (evaluator.role === "student" &&
+          evaluatee.role === "instructor" &&
+          evaluatee.id === course.instructorId)
+      )
     ) {
-      return res
-        .status(403)
-        .json({ error: "Only course instructor can evaluate students." });
+      return res.status(403).json({
+        error:
+          "Only instructor can evaluate students, or students can evaluate their course instructor.",
+      });
     }
 
-    // ✅ 自动获取该学生在本课程下的 team
-    const membership = await db.TeamMembership.findOne({
-      include: [
-        {
-          model: db.Team,
-          where: { courseId },
-          attributes: ["id", "name"],
-        },
-      ],
-      where: { userId: evaluateeId },
-    });
+    // // ✅ 自动获取该学生在本课程下的 team
+    // const membership = await db.TeamMembership.findOne({
+    //   include: [
+    //     {
+    //       model: db.Team,
+    //       where: { courseId },
+    //       attributes: ["id", "name"],
+    //     },
+    //   ],
+    //   where: { userId: evaluateeId },
+    // });
 
-    const teamId = membership ? membership.teamId : null; // 如果学生未分组，也允许为 null
+    // const teamId = membership ? membership.teamId : null; // 如果学生未分组，也允许为 null
+
+    // ✅ 自动获取相关的 teamId
+    let teamId = null;
+
+    if (evaluator.role === "instructor" && evaluatee.role === "student") {
+      // 老师给学生 → 查学生的组
+      const membership = await db.TeamMembership.findOne({
+        include: [
+          { model: db.Team, where: { courseId }, attributes: ["id", "name"] },
+        ],
+        where: { userId: evaluateeId },
+      });
+      teamId = membership ? membership.teamId : null;
+    }
+
+    if (evaluator.role === "student" && evaluatee.role === "instructor") {
+      // 学生给老师 → 查自己的组
+      const membership = await db.TeamMembership.findOne({
+        include: [
+          { model: db.Team, where: { courseId }, attributes: ["id", "name"] },
+        ],
+        where: { userId: evaluatorId },
+      });
+      teamId = membership ? membership.teamId : null;
+    }
 
     // ✅ 创建 Evaluation（不依赖 teamId）
     const evaluation = await db.Evaluation.create({
@@ -249,15 +291,16 @@ router.post("/courses/:courseId/evaluations", requireAuth, async (req, res) => {
       const displayName = anonymousToPeers
         ? "Anonymous"
         : evaluator.name || "Someone";
+
       await db.Notification.create({
         userId: evaluateeId,
         type: "evaluation_received",
         title: `New Evaluation from ${course.title}`,
         body: `You received ${displayName}'s feedback in ${course.title}.`,
-        // link: teamId
-        //   ? `/teams/${teamId}/evaluations`
-        //   : `/courses/${courseId}/evaluations`,
-        link: `/teams/${teamId}/evaluations?tab=received`,
+        link: teamId
+          ? `/teams/${teamId}/evaluations?tab=received`
+          : `/courses/${courseId}/evaluations`,
+        // link: `/teams/${teamId}/evaluations?tab=received`,
       });
     } catch (notifyErr) {
       console.error("⚠️ Failed to create notification:", notifyErr);

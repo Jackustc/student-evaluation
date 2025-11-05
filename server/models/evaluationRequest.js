@@ -3,7 +3,7 @@ module.exports = (sequelize, DataTypes) => {
   const EvaluationRequest = sequelize.define("EvaluationRequest", {
     teamId: {
       type: DataTypes.INTEGER,
-      allowNull: false,
+      allowNull: true,
     },
     requesterId: {
       type: DataTypes.INTEGER,
