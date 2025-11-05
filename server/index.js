@@ -20,6 +20,7 @@ app.use("/notifications", require("./routes/notifications"));
 app.use("/auth", require("./routes/auth"));
 app.use("/courses", require("./routes/courses"));
 app.use("/teams", require("./routes/teams"));
+app.use("/evaluation-likes", require("./routes/evaluationLikes"));
 app.use("/", require("./routes/evaluationRequests"));
 app.use("/", require("./routes/evaluations"));
 app.use("/ai", require("./routes/ai"));
