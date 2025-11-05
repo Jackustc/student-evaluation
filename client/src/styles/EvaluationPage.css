@@ -109,12 +109,15 @@ textarea {
   margin-top: 1rem;
 }
 .eval-card {
+  position: relative; /* ✅ 让右下角定位生效 */
   border: 1px solid #e5e7eb;
   border-radius: 6px;
   padding: 10px;
+  /* padding-bottom: 32px;  */
   margin-bottom: 10px;
   background-color: #fafafa;
 }
+
 .eval-meta {
   font-size: 0.95rem;
   margin-bottom: 4px;
@@ -154,6 +157,30 @@ textarea {
 .meta-right {
   font-size: 0.85rem;
   color: #888;
+}
+
+.like-section {
+  position: absolute; /* ✅ 固定位置在卡片右下角 */
+  right: 12px; /* 距离右侧 */
+  bottom: 8px; /* 距离底部 */
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 15px;
+  color: #555;
+}
+
+.like-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 16px;
+  color: #555;
+  transition: color 0.2s ease;
+}
+
+.like-btn:hover {
+  color: #007bff;
 }
 
 @keyframes fadeInOut {

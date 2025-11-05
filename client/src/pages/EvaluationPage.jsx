@@ -9,6 +9,7 @@ export default function EvaluationPage() {
   const { id } = useParams(); // teamId
 
   const location = useLocation();
+
   useEffect(() => {
     const params = new URLSearchParams(location.search);
     const tabParam = params.get("tab");
@@ -33,6 +34,22 @@ export default function EvaluationPage() {
   const [received, setReceived] = useState([]);
   const [given, setGiven] = useState([]);
   const [allEvals, setAllEvals] = useState([]);
+
+  // 获取点赞数量
+  const fetchLikes = async (evaluationId) => {
+    try {
+      const { data } = await api.get(`/evaluation-likes/${evaluationId}/likes`);
+      return data.likes || 0;
+    } catch {
+      return 0;
+    }
+  };
+
+  // 切换点赞状态
+  const toggleLike = async (evaluationId) => {
+    const { data } = await api.post(`/evaluation-likes/${evaluationId}/like`);
+    return data.liked; // true 表示现在已点赞
+  };
 
   useEffect(() => {
     async function fetchTeam() {
@@ -86,9 +103,22 @@ export default function EvaluationPage() {
         .get(`/teams/${id}/evaluations/given`)
         .then((res) => setGiven(res.data));
     } else if (tab === "all") {
-      api
-        .get(`/teams/${id}/evaluations/all`)
-        .then((res) => setAllEvals(res.data));
+      // api
+      //   .get(`/teams/${id}/evaluations/all`)
+      //   .then((res) => setAllEvals(res.data));
+      api.get(`/teams/${id}/evaluations/all`).then(async (res) => {
+        const list = res.data;
+
+        // 并发获取每条的点赞数
+        const likeCounts = await Promise.all(list.map((e) => fetchLikes(e.id)));
+
+        const merged = list.map((e, i) => ({
+          ...e,
+          likes: likeCounts[i] || 0,
+        }));
+
+        setAllEvals(merged);
+      });
     }
   }, [tab, id]);
 
@@ -254,28 +284,54 @@ export default function EvaluationPage() {
           {allEvals.length === 0 ? (
             <p>No evaluations yet.</p>
           ) : (
-            <table className="eval-table">
-              <thead>
-                <tr>
-                  <th>Giver</th>
-                  <th>Receiver</th>
-                  <th>Score</th>
-                  <th>Comment</th>
-                  <th>Date</th>
-                </tr>
-              </thead>
-              <tbody>
-                {allEvals.map((e) => (
-                  <tr key={e.id}>
-                    <td>{e.evaluatorName}</td>
-                    <td>{e.evaluateeName}</td>
-                    <td>{e.score}</td>
-                    <td>{e.comment}</td>
-                    <td>{new Date(e.createdAt).toLocaleString()}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+            allEvals.map((e) => (
+              <div key={e.id} className="eval-card">
+                <div className="eval-meta">
+                  <div className="meta-left">
+                    <strong>{e.evaluatorName}</strong> To{" "}
+                    <strong>{e.evaluateeName} </strong> ⭐ {e.score}
+                  </div>
+                  <div className="meta-right">
+                    {new Date(e.createdAt).toLocaleString()}
+                  </div>
+                </div>
+                <p>{e.comment}</p>
+                <div className="like-section">
+                  <button
+                    className="like-btn"
+                    onClick={async () => {
+                      try {
+                        // 乐观更新
+                        setAllEvals((prev) =>
+                          prev.map((x) =>
+                            x.id === e.id
+                              ? {
+                                  ...x,
+                                  likes: (x.likes || 0) + (e._liked ? -1 : 1),
+                                  _liked: !e._liked,
+                                }
+                              : x
+                          )
+                        );
+                        const liked = await toggleLike(e.id);
+                        const latestLikes = await fetchLikes(e.id);
+                        setAllEvals((prev) =>
+                          prev.map((x) =>
+                            x.id === e.id
+                              ? { ...x, likes: latestLikes, _liked: liked }
+                              : x
+                          )
+                        );
+                      } catch (err) {
+                        console.error("❌ Like failed:", err);
+                      }
+                    }}
+                  >
+                    👍 {e.likes || 0}
+                  </button>
+                </div>
+              </div>
+            ))
           )}
         </div>
       )}
