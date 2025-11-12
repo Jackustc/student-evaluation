@@ -3,7 +3,8 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
-    "start": "nodemon --watch routes --watch models --watch middleware --watch index.js index.js"
+    "start": "node index.js",
+    "dev": "nodemon --watch routes --watch models --watch middleware --watch index.js index.js"
   },
   "keywords": [],
   "author": "",
