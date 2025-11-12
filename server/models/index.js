@@ -25,7 +25,7 @@ const modelFiles = [
   "team",
   "teamMembership",
   "evaluation",
-  "EvaluationLike", // ✅ 大写，和文件名一致！
+  "evaluationLike", // ✅ 小写，和文件名一致！
   "evaluationRequest",
   "notification",
 ];
