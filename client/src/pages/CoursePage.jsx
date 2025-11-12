@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import api from "../api";
 import "../styles/CoursePage.css";
+import FloatingAIAssistant from "../components/FloatingAIAssistant";
 import { useAuthStore } from "../store/auth";
 
 export default function CoursePage() {
@@ -14,8 +15,14 @@ export default function CoursePage() {
   const [instructorScore, setInstructorScore] = useState("");
   const [instructorComment, setInstructorComment] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
-
   const [showEvalForm, setShowEvalForm] = useState(false);
+
+  // ✅ toast 状态
+  const [message, setMessage] = useState("");
+  const showMessage = (text) => {
+    setMessage(text);
+    setTimeout(() => setMessage(""), 2500);
+  };
 
   const { user } = useAuthStore();
 
@@ -23,16 +30,13 @@ export default function CoursePage() {
   useEffect(() => {
     async function fetchCourse() {
       try {
-        // 先拿课程信息（含 title）
         const courseRes = await api.get(`/courses/${id}`);
         setCourse(courseRes.data);
-
-        // 再拿课程下所有团队
         const teamRes = await api.get(`/courses/${id}/teams`);
-        // setCourse({ id });
         setTeams(teamRes.data);
       } catch (err) {
         console.error(err);
+        showMessage("❌ Failed to load course data.");
       }
     }
     fetchCourse();
@@ -40,21 +44,22 @@ export default function CoursePage() {
 
   // 创建新小组
   const createTeam = async () => {
-    if (!newTeamName) return;
+    if (!newTeamName) return showMessage("❌ Please enter a team name.");
     try {
       const res = await api.post(`/courses/${id}/teams`, { name: newTeamName });
       setTeams([...teams, res.data]);
       setNewTeamName("");
+      showMessage("✅ Team created successfully!");
     } catch (err) {
       console.error(err);
+      showMessage("❌ Failed to create team.");
     }
   };
 
   const joinTeam = async (teamId) => {
     try {
       await api.post(`/teams/${teamId}/members`);
-      alert("Joined the team!");
-      // ✅ 更新前端状态（把自己加到 TeamMemberships）
+      showMessage("✅ Joined the team!");
       setTeams((prev) =>
         prev.map((t) =>
           t.id === teamId
@@ -70,7 +75,7 @@ export default function CoursePage() {
       );
     } catch (err) {
       console.error(err);
-      alert("Failed to join team");
+      showMessage("❌ Failed to join team.");
     }
   };
 
@@ -78,13 +83,10 @@ export default function CoursePage() {
     const confirmLeave = window.confirm(
       "Are you sure you want to leave this team?\nYou will lose access to team evaluations and discussions."
     );
-
-    if (!confirmLeave) return; // 用户点击取消，直接中断
-
+    if (!confirmLeave) return;
     try {
       await api.delete(`/teams/${teamId}/members`);
-      alert("✅ You have left the team.");
-      // 更新前端视图
+      showMessage("✅ You have left the team.");
       setTeams((prev) =>
         prev.map((t) =>
           t.id === teamId
@@ -99,17 +101,14 @@ export default function CoursePage() {
       );
     } catch (err) {
       console.error(err);
-      alert("❌ Failed to leave team.");
+      showMessage("❌ Failed to leave team.");
     }
   };
 
   // ✅ 提交学生对老师的评价
   const submitInstructorEvaluation = async () => {
-    if (!instructorScore || !instructorComment) {
-      alert("Please provide both score and comment.");
-      return;
-    }
-
+    if (!instructorScore || !instructorComment)
+      return showMessage("❌ Please provide both score and comment.");
     setIsSubmitting(true);
     try {
       await api.post(`/courses/${id}/evaluations`, {
@@ -118,12 +117,12 @@ export default function CoursePage() {
         comment: instructorComment,
         anonymousToPeers: false,
       });
-      alert("✅ Evaluation submitted successfully!");
+      showMessage("✅ Evaluation submitted successfully!");
       setInstructorScore("");
       setInstructorComment("");
     } catch (err) {
       console.error("❌ Failed to submit evaluation:", err);
-      alert("Failed to submit evaluation.");
+      showMessage("❌ Failed to submit evaluation.");
     } finally {
       setIsSubmitting(false);
     }
@@ -131,22 +130,33 @@ export default function CoursePage() {
 
   // ✅ 学生请求老师评价自己
   const requestInstructorEvaluation = async () => {
-    if (!course?.instructor?.id) return alert("Instructor not found.");
+    if (!course?.instructor?.id) return showMessage("❌ Instructor not found.");
     setIsSubmitting(true);
     try {
       await api.post(`/courses/${id}/request-instructor-evaluation`);
-      alert("✅ Request sent to instructor!");
+      showMessage("✅ Request sent to instructor!");
     } catch (err) {
       console.error("❌ Failed to send request:", err);
-      alert("Failed to send request.");
+      showMessage("❌ Failed to send request.");
     } finally {
       setIsSubmitting(false);
     }
   };
 
+  if (!course) return <p>Loading...</p>;
+
   return (
     <div className="course-container">
       <h2 className="course-title">{course?.title || "Course"}</h2>
+
+      {/* ✅ Toast 提示 */}
+      {message && (
+        <div
+          className={`toast ${message.startsWith("✅") ? "success" : "error"}`}
+        >
+          {message}
+        </div>
+      )}
 
       <div className="teams-section">
         <h3 className="section-title">Teams</h3>
@@ -158,7 +168,6 @@ export default function CoursePage() {
               const isMember = t.TeamMemberships?.some(
                 (m) => m.userId === user?.id
               );
-
               return (
                 <li key={t.id} className="team-item">
                   <span>{t.name}</span>
@@ -166,7 +175,6 @@ export default function CoursePage() {
                     <Link to={`/teams/${t.id}`}>
                       <button className="team-btn">Go to Team</button>
                     </Link>
-
                     {isMember ? (
                       <button
                         className="leave-btn"
@@ -256,6 +264,11 @@ export default function CoursePage() {
             </div>
           )}
         </div>
+      )}
+
+      {/* ✅ 浮动 AI 助手（仅在显示表单时） */}
+      {showEvalForm && course?.aiEnabled === 1 && (
+        <FloatingAIAssistant evaluateeName={course?.instructor?.name} />
       )}
     </div>
   );

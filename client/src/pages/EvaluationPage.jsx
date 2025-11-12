@@ -336,12 +336,15 @@ export default function EvaluationPage() {
         </div>
       )}
 
-      {/* ✅ 悬浮式 AI 助手 */}
-      <FloatingAIAssistant
-        evaluateeName={
-          members.find((m) => m.id === Number(evaluateeId))?.name || "teammate"
-        }
-      />
+      {/* ✅ 悬浮式 AI 助手（仅当允许 AI 时显示） */}
+      {team?.Course?.aiEnabled === 1 && (
+        <FloatingAIAssistant
+          evaluateeName={
+            members.find((m) => m.id === Number(evaluateeId))?.name ||
+            "teammate"
+          }
+        />
+      )}
     </div>
   );
 }

@@ -2,6 +2,7 @@
 import { useEffect, useState } from "react";
 import { useParams, useLocation } from "react-router-dom";
 import api from "../api";
+import FloatingAIAssistant from "../components/FloatingAIAssistant";
 import "../styles/GiveEvaluationPage.css";
 
 export default function GiveEvaluationPage() {
@@ -9,15 +10,41 @@ export default function GiveEvaluationPage() {
   const location = useLocation();
   const preselectId = new URLSearchParams(location.search).get("student");
 
+  const [course, setCourse] = useState(null); // ✅ 新增课程状态
   const [students, setStudents] = useState([]);
   const [search, setSearch] = useState("");
   const [selected, setSelected] = useState(preselectId || null);
 
   const [score, setScore] = useState(5);
   const [comment, setComment] = useState("");
-  const [anonymous, setAnonymous] = useState(true); // 匿名状态
-  const [message, setMessage] = useState("");
+  const [anonymous, setAnonymous] = useState(true);
 
+  // ✅ toast 状态
+  const [message, setMessage] = useState("");
+  const showMessage = (text) => {
+    setMessage(text);
+    setTimeout(() => setMessage(""), 2500);
+  };
+
+  // ✅ 加载课程信息（包含 aiEnabled）
+  useEffect(() => {
+    async function fetchCourse() {
+      try {
+        const res = await api.get(`/courses/${id}`);
+        setCourse(res.data);
+      } catch (err) {
+        console.error("❌ Failed to load course:", err);
+        showMessage("❌ Failed to load course.");
+      }
+    }
+    fetchCourse();
+  }, [id]);
+  // console.log("Fetching course info for:", id);
+  useEffect(() => {
+    console.log("✅ course data:", course);
+  }, [course]);
+
+  // ✅ 加载学生名单
   useEffect(() => {
     async function loadRoster() {
       try {
@@ -25,15 +52,11 @@ export default function GiveEvaluationPage() {
         setStudents(res.data);
       } catch (err) {
         console.error("❌ Failed to load roster:", err);
+        showMessage("❌ Failed to load roster.");
       }
     }
     loadRoster();
   }, [id]);
-
-  const showMessage = (text) => {
-    setMessage(text);
-    setTimeout(() => setMessage(""), 2000);
-  };
 
   const filtered = students.filter((s) =>
     s.name.toLowerCase().includes(search.toLowerCase())
@@ -58,11 +81,20 @@ export default function GiveEvaluationPage() {
     }
   };
 
+  // ✅ 当选中学生时自动打开 Floating AI Assistant
+  useEffect(() => {
+    if (selected) {
+      const event = new CustomEvent("open-ai-assistant");
+      window.dispatchEvent(event);
+    }
+  }, [selected]);
+
   return (
     <div className="give-eval-page">
       <h2>⭐ Give Evaluation (Course Level)</h2>
       <p className="hint">You can evaluate any student in this course.</p>
 
+      {/* ✅ Toast 提示 */}
       {message && (
         <div
           className={`toast ${message.startsWith("✅") ? "success" : "error"}`}
@@ -131,9 +163,6 @@ export default function GiveEvaluationPage() {
             />
             Submit anonymously
           </label>
-          {/* <p className="anon-hint">
-            (Note: Instructors' evaluations are always visible to students.)
-          </p> */}
 
           <div className="buttons">
             <button className="submit-btn" onClick={submitEvaluation}>
@@ -150,6 +179,15 @@ export default function GiveEvaluationPage() {
             </button>
           </div>
         </div>
+      )}
+
+      {/* ✅ 浮动 AI 助手（仅当课程允许且选择学生时显示） */}
+      {course?.aiEnabled && (
+        <FloatingAIAssistant
+          evaluateeName={
+            students.find((s) => s.id === Number(selected))?.name || "student"
+          }
+        />
       )}
     </div>
   );

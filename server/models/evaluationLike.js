@@ -1,4 +1,4 @@
-// server/models/EvaluationLike.js
+// server/models/evaluationLike.js
 module.exports = (sequelize, DataTypes) => {
   const EvaluationLike = sequelize.define("EvaluationLike", {
     // 不需要额外自定义字段，Sequelize 会自动生成 id / createdAt / updatedAt
