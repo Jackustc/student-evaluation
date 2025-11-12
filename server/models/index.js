@@ -27,7 +27,7 @@ const modelFiles = [
   "evaluation",
   "evaluationLike", // ✅ 小写，和文件名一致！
   "evaluationRequest",
-  "notification",
+  "Notification",
 ];
 
 for (const file of modelFiles) {
