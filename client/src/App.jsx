@@ -20,6 +20,7 @@ import EvaluationPage from "./pages/EvaluationPage";
 import NotificationPage from "./pages/NotificationPage";
 import RequestEvaluationPage from "./pages/RequestEvaluationPage";
 import GiveEvaluationPage from "./pages/GiveEvaluationPage";
+import JoinPage from "./pages/JoinPage";
 
 function AppContent() {
   const location = useLocation();
@@ -86,6 +87,7 @@ function AppContent() {
           path="/courses/:id/evaluations/request"
           element={<RequestEvaluationPage />}
         />
+        <Route path="/join" element={<JoinPage />} />
       </Routes>
     </>
   );

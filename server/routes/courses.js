@@ -257,7 +257,7 @@ router.get(
       const course = await db.Course.findByPk(courseId);
       if (!course) return res.status(404).json({ error: "Course not found" });
 
-      const joinUrl = `${process.env.CORS_ORIGIN}/join/${course.joinToken}`;
+      const joinUrl = `${process.env.CORS_ORIGIN}/join?token=${course.joinToken}`;
       const qrDataUrl = await QRCode.toDataURL(joinUrl);
 
       res.json({ joinUrl, qrDataUrl });
