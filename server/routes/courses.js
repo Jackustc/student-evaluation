@@ -79,6 +79,41 @@ router.patch(
   }
 );
 
+// ✅ 更新 Course title & code
+router.patch(
+  "/:courseId/basic",
+  requireAuth,
+  requireRole("instructor"),
+  async (req, res) => {
+    try {
+      const { courseId } = req.params;
+      const { title, code } = req.body;
+
+      const course = await db.Course.findByPk(courseId);
+      if (!course) return res.status(404).json({ error: "Course not found" });
+
+      // 只能改自己的课程
+      if (course.instructorId !== req.user.id) {
+        return res.status(403).json({ error: "Not authorized" });
+      }
+
+      // 更新字段
+      if (title !== undefined) course.title = title;
+      if (code !== undefined) course.code = code;
+
+      await course.save();
+
+      res.json({
+        message: "Course title/code updated",
+        course,
+      });
+    } catch (err) {
+      console.error("❌ Failed to update basic info:", err);
+      res.status(500).json({ error: "Server error updating basic info" });
+    }
+  }
+);
+
 // ✅ 更新 AI Assistant 开关
 router.patch(
   "/:id/ai-enabled",

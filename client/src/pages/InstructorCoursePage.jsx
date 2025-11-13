@@ -19,6 +19,16 @@ export default function InstructorCoursePage() {
   const [description, setDescription] = useState("");
   const [editingDesc, setEditingDesc] = useState(false);
 
+  const [editingBasic, setEditingBasic] = useState(false);
+  const [editTitle, setEditTitle] = useState("");
+  const [editCode, setEditCode] = useState("");
+
+  const [message, setMessage] = useState("");
+  const showMessage = (text) => {
+    setMessage(text);
+    setTimeout(() => setMessage(""), 2500);
+  };
+
   useEffect(() => {
     async function fetchData() {
       try {
@@ -36,7 +46,7 @@ export default function InstructorCoursePage() {
         setTeams(resTeams.data);
       } catch (err) {
         console.error("Failed to load course:", err);
-        alert("Failed to load course data. Please check login status.");
+        showMessage("Failed to load course data. Please check login status.");
       }
     }
     fetchData();
@@ -45,13 +55,30 @@ export default function InstructorCoursePage() {
   const saveDescription = async () => {
     try {
       await api.patch(`/courses/${id}/description`, { description });
-      alert("✅ Description updated!");
+      showMessage("✅ Description updated!");
       setEditingDesc(false);
     } catch (err) {
       console.error(err);
-      alert("❌ Failed to update description");
+      showMessage("❌ Failed to update description");
     }
   };
+
+  const saveBasicInfo = async () => {
+    try {
+      const res = await api.patch(`/courses/${id}/basic`, {
+        title: editTitle,
+        code: editCode,
+      });
+
+      setCourse(res.data.course);
+      showMessage("✅ Course info updated!");
+      setEditingBasic(false);
+    } catch (err) {
+      console.error(err);
+      showMessage("❌ Failed to update course info");
+    }
+  };
+
   const generateWithAI = async () => {
     try {
       setLoadingAI(true);
@@ -62,7 +89,7 @@ export default function InstructorCoursePage() {
       setDescription(res.data.content);
     } catch (err) {
       console.error(err);
-      alert("❌ Failed to generate with AI");
+      showMessage("❌ Failed to generate with AI");
     } finally {
       setLoadingAI(false);
     }
@@ -73,10 +100,10 @@ export default function InstructorCoursePage() {
       setLoading(true);
       const res = await api.post(`/courses/${id}/join-token/rotate`);
       setJoinToken(res.data.joinToken);
-      alert("✅ Join Token refreshed!");
+      showMessage("✅ Join Token refreshed!");
     } catch (err) {
       console.error(err);
-      alert("❌ Failed to refresh token");
+      showMessage("❌ Failed to refresh token");
     } finally {
       setLoading(false);
     }
@@ -93,7 +120,7 @@ export default function InstructorCoursePage() {
       setShowQR(true);
     } catch (err) {
       console.error(err);
-      alert("❌ Failed to get QR code");
+      showMessage("❌ Failed to get QR code");
     }
   };
 
@@ -101,8 +128,71 @@ export default function InstructorCoursePage() {
 
   return (
     <div className="instructor-course-page">
-      <h2 className="page-title">{course.title}</h2>
-      <p className="course-meta">Course Code: {course.code}</p>
+      {/* ✅ Toast 提示 */}
+      {message && (
+        <div
+          className={`toast ${message.startsWith("✅") ? "success" : "error"}`}
+        >
+          {message}
+        </div>
+      )}
+
+      {/* --- Basic Info Section (Title + Code) --- */}
+      <section className="card-section">
+        <div className="section-header">
+          <h3>Basic Info</h3>
+
+          {!editingBasic ? (
+            <button
+              className="btn-edit"
+              onClick={() => {
+                setEditingBasic(true);
+                setEditTitle(course.title);
+                setEditCode(course.code);
+              }}
+            >
+              Edit
+            </button>
+          ) : (
+            <div className="desc-buttons">
+              <button className="btn-save" onClick={saveBasicInfo}>
+                Save
+              </button>
+              <button
+                className="btn-cancel"
+                onClick={() => setEditingBasic(false)}
+              >
+                Cancel
+              </button>
+            </div>
+          )}
+        </div>
+
+        {!editingBasic ? (
+          <>
+            <h2 className="page-title">{course.title}</h2>
+            <p className="course-meta">Course Code: {course.code}</p>
+          </>
+        ) : (
+          <div className="edit-basic-form">
+            <label>
+              Title:
+              <input
+                value={editTitle}
+                onChange={(e) => setEditTitle(e.target.value)}
+              />
+            </label>
+
+            <label>
+              Code:
+              <input
+                value={editCode}
+                onChange={(e) => setEditCode(e.target.value)}
+              />
+            </label>
+          </div>
+        )}
+      </section>
 
       {/* --- AI Assistant Section --- */}
       <section className="card-section">
@@ -117,7 +207,7 @@ export default function InstructorCoursePage() {
           </strong>
         </p>
 
-        <label>
+        {/* <label>
           <input
             type="checkbox"
             checked={course.aiEnabled}
@@ -128,15 +218,17 @@ export default function InstructorCoursePage() {
                   aiEnabled: newValue,
                 });
                 setCourse({ ...course, aiEnabled: newValue });
-                alert(`AI Assistant ${newValue ? "enabled" : "disabled"}!`);
+                showMessage(
+                  `AI Assistant ${newValue ? "enabled" : "disabled"}!`
+                );
               } catch (err) {
                 console.error(err);
-                alert("❌ Failed to update AI Assistant setting");
+                showMessage("❌ Failed to update AI Assistant setting");
               }
             }}
           />{" "}
           Enable AI Assistant for this course
-        </label>
+        </label> */}
       </section>
 
       {/* --- Description Section --- */}
