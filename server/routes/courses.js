@@ -26,11 +26,26 @@ router.post("/join", requireAuth, async (req, res) => {
   const course = await db.Course.findOne({ where: { joinToken } });
   if (!course) return res.status(404).json({ error: "Course not found" });
 
-  await db.Enrollment.findOrCreate({
-    where: { courseId: course.id, userId: req.user.id },
-  });
+  // await db.Enrollment.findOrCreate({
+  //   where: { courseId: course.id, userId: req.user.id },
+  // });
+
+  // res.json({ message: "Joined", course });
   // res.json({ message: "Joined", courseId: course.id });
-  res.json({ message: "Joined", course });
+
+  // ⭐ 关键修改: findOrCreate 会告诉我们 Enrollment 是创建的还是已经存在的
+  const [enrollment, created] = await db.Enrollment.findOrCreate({
+    where: {
+      courseId: course.id,
+      userId: req.user.id,
+    },
+  });
+
+  // ⭐ 返回给前端的状态
+  res.json({
+    message: created ? "joined" : "already-in",
+    course,
+  });
 });
 
 // 老师获取自己建的课程
@@ -292,6 +307,7 @@ router.get(
       const course = await db.Course.findByPk(courseId);
       if (!course) return res.status(404).json({ error: "Course not found" });
 
+      // console.log("CORS_ORIGIN =", process.env.CORS_ORIGIN);
       const joinUrl = `${process.env.CORS_ORIGIN}/join?token=${course.joinToken}`;
       const qrDataUrl = await QRCode.toDataURL(joinUrl);
 
