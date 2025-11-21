@@ -22,6 +22,11 @@ import RequestEvaluationPage from "./pages/RequestEvaluationPage";
 import GiveEvaluationPage from "./pages/GiveEvaluationPage";
 import JoinPage from "./pages/JoinPage";
 
+import AdminHome from "./pages/admin/AdminHome";
+import AdminInstructors from "./pages/admin/AdminInstructors";
+import AdminCourses from "./pages/admin/AdminCourses";
+import AdminCourseStudents from "./pages/admin/AdminCourseStudents";
+
 function AppContent() {
   const location = useLocation();
   const hideNavbar = location.pathname === "/login";
@@ -88,6 +93,15 @@ function AppContent() {
           element={<RequestEvaluationPage />}
         />
         <Route path="/join" element={<JoinPage />} />
+
+        {/* Admin routes */}
+        <Route path="/admin" element={<AdminHome />} />
+        <Route path="/admin/instructors" element={<AdminInstructors />} />
+        <Route path="/admin/courses" element={<AdminCourses />} />
+        <Route
+          path="/admin/courses/:courseId/students"
+          element={<AdminCourseStudents />}
+        />
       </Routes>
     </>
   );

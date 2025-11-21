@@ -27,6 +27,7 @@ export default function LoginPage() {
         // const user = await login(email, password);
         const fullEmail = `${email}@northeastern.edu`.trim();
         const user = await login(fullEmail, password);
+        console.log("LOGIN RESULT:", user);
         // if (user?.role === "instructor") {
         //   navigate("/instructor");
         // } else {
@@ -38,6 +39,8 @@ export default function LoginPage() {
 
         if (redirect) {
           navigate(redirect);
+        } else if (user?.role === "admin") {
+          navigate("/admin");
         } else if (user?.role === "instructor") {
           navigate("/instructor");
         } else {
