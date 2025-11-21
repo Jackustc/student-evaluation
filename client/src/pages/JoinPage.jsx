@@ -7,6 +7,7 @@ export default function JoinPage() {
 
   useEffect(() => {
     const token = new URLSearchParams(window.location.search).get("token");
+    const userToken = localStorage.getItem("token"); // 你的身份登录用的 JWT
 
     if (!token) {
       alert("Invalid join link");
@@ -14,15 +15,26 @@ export default function JoinPage() {
       return;
     }
 
+    // ❗ 如果用户没有登录，先跳登录
+    if (!userToken) {
+      navigate(`/login?redirect=/join?token=${token}`);
+      return;
+    }
+
     async function joinCourse() {
       try {
         const res = await api.post("/courses/join", { joinToken: token });
-        alert("Joined successfully!");
-        navigate("/student"); // 根据你系统改
+        if (res.data.message === "already-in") {
+          // 用户已经在课程中
+          navigate("/student");
+        } else {
+          alert("Joined successfully!");
+          navigate("/student");
+        }
       } catch (err) {
         console.error(err);
         alert("Failed to join course");
-        navigate("/");
+        navigate("/student");
       }
     }
 

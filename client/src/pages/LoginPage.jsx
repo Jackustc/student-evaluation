@@ -22,7 +22,18 @@ export default function LoginPage() {
     } else {
       try {
         const user = await login(email, password);
-        if (user?.role === "instructor") {
+        // if (user?.role === "instructor") {
+        //   navigate("/instructor");
+        // } else {
+        //   navigate("/student");
+        // }
+        const redirect = new URLSearchParams(window.location.search).get(
+          "redirect"
+        );
+
+        if (redirect) {
+          navigate(redirect);
+        } else if (user?.role === "instructor") {
           navigate("/instructor");
         } else {
           navigate("/student");
