@@ -16,12 +16,17 @@ export default function LoginPage() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (isRegister) {
-      await register(name, email, password, role, studentId);
+      // await register(name, email, password, role, studentId);
+      const fullEmail = `${email}@northeastern.edu`.trim();
+      await register(name, fullEmail, password, role, studentId);
+
       alert("Registered! Please login.");
       setIsRegister(false);
     } else {
       try {
-        const user = await login(email, password);
+        // const user = await login(email, password);
+        const fullEmail = `${email}@northeastern.edu`.trim();
+        const user = await login(fullEmail, password);
         // if (user?.role === "instructor") {
         //   navigate("/instructor");
         // } else {
@@ -73,11 +78,15 @@ export default function LoginPage() {
             )}
           </>
         )}
-        <input
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          placeholder="Email"
-        />
+        <div className="email-wrapper">
+          <input
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            placeholder="Email prefix"
+          />
+          <span className="email-suffix">@northeastern.edu</span>
+        </div>
+
         <input
           type="password"
           value={password}

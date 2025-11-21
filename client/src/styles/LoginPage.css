@@ -14,6 +14,26 @@
   color: #333;
 }
 
+.email-wrapper {
+  display: flex;
+  align-items: center;
+  /* border: 1px solid #ccc; */
+  /* padding: 0 8px; */
+}
+
+.email-wrapper input {
+  border: none;
+  flex: 1;
+  padding: 10px;
+  font-size: 14px;
+  outline: none;
+}
+
+.email-suffix {
+  color: #555;
+  font-size: 16px;
+}
+
 .login-form {
   display: flex;
   flex-direction: column;
