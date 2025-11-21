@@ -222,7 +222,7 @@ export default function CoursePage() {
               className="team-btn"
               onClick={() => setShowEvalForm((prev) => !prev)}
             >
-              ⭐ Go to Evaluation
+              ⭐ Evaluate Instructor
             </button>
 
             <button
