@@ -24,6 +24,8 @@ app.use("/evaluation-likes", require("./routes/evaluationLikes"));
 app.use("/", require("./routes/evaluationRequests"));
 app.use("/", require("./routes/evaluations"));
 app.use("/ai", require("./routes/ai"));
+const adminRoutes = require("./routes/admin");
+app.use("/admin", adminRoutes);
 
 app.get("/health", (req, res) => res.json({ ok: true }));
 

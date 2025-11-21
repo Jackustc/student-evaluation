@@ -4,7 +4,7 @@ module.exports = (sequelize, DataTypes) => {
     email: { type: DataTypes.STRING, unique: true, allowNull: false },
     passwordHash: { type: DataTypes.STRING, allowNull: false },
     role: {
-      type: DataTypes.ENUM("student", "instructor"),
+      type: DataTypes.ENUM("student", "instructor", "admin"),
       defaultValue: "student",
     },
     studentId: { type: DataTypes.STRING, allowNull: true },
