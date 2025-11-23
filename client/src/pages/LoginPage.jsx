@@ -5,7 +5,9 @@ import "../styles/LoginPage.css";
 
 export default function LoginPage() {
   const { login, register, user } = useAuthStore();
-  const [email, setEmail] = useState("");
+  // const [email, setEmail] = useState("");
+  const [email, setEmail] = useState("@northeastern.edu");
+
   const [password, setPassword] = useState("");
   const [name, setName] = useState("");
   const [role, setRole] = useState("student");
@@ -15,9 +17,12 @@ export default function LoginPage() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    const fullEmail = email.trim();
     if (isRegister) {
       // await register(name, email, password, role, studentId);
-      const fullEmail = `${email}@northeastern.edu`.trim();
+      // const fullEmail = `${email}@northeastern.edu`.trim();
+
       await register(name, fullEmail, password, role, studentId);
 
       alert("Registered! Please login.");
@@ -25,7 +30,8 @@ export default function LoginPage() {
     } else {
       try {
         // const user = await login(email, password);
-        const fullEmail = `${email}@northeastern.edu`.trim();
+        // const fullEmail = `${email}@northeastern.edu`.trim();
+
         const user = await login(fullEmail, password);
         console.log("LOGIN RESULT:", user);
         // if (user?.role === "instructor") {
@@ -82,12 +88,17 @@ export default function LoginPage() {
           </>
         )}
         <div className="email-wrapper">
-          <input
+          {/* <input
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             placeholder="Email prefix"
+          /> */}
+          <input
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            placeholder="Email"
           />
-          <span className="email-suffix">@northeastern.edu</span>
+          {/* <span className="email-suffix">@northeastern.edu</span> */}
         </div>
 
         <input
