@@ -47,6 +47,33 @@ export default function InstructorPage() {
     }
   };
 
+ const deleteCourse = async (course) => {
+  // ⭐ 第一步：输入课程名确认（前端保护）
+  const nameCheck = prompt(
+    `Type "${course.title}" to confirm deletion:`
+  );
+
+  if (nameCheck !== course.title) {
+    alert("Course name does not match. Deletion cancelled.");
+    return;
+  }
+
+  try {
+    // ⭐ 第二步：传 confirm 给后端（服务器保护）
+    await api.delete(`/courses/${course.id}`, {
+      data: { confirm: "DELETE" },
+    });
+
+    // ⭐ 第三步：更新前端状态
+    setCourses((prev) => prev.filter((c) => c.id !== course.id));
+  } catch (err) {
+    console.error("Delete failed", err);
+    alert("Delete failed.");
+  }
+};
+
+
+
   return (
     <div className="instructor-container">
       <h2 className="dashboard-title">Instructor Dashboard</h2>
@@ -81,7 +108,7 @@ export default function InstructorPage() {
       ) : (
         <div className="course-grid">
           {courses.map((c) => (
-            <CourseCard key={c.id} course={c} isInstructor={true} />
+            <CourseCard key={c.id} course={c} isInstructor={true} onDelete={deleteCourse} />
           ))}
         </div>
       )}

@@ -1,7 +1,7 @@
 import { useNavigate } from "react-router-dom";
 import "../styles/CourseCard.css";
 
-export default function CourseCard({ course, isInstructor = false }) {
+export default function CourseCard({ course, isInstructor = false, onDelete }) {
   const navigate = useNavigate();
 
   // 路径区分：老师进入 /instructor/courses/:id，学生进入 /courses/:id
@@ -22,6 +22,18 @@ export default function CourseCard({ course, isInstructor = false }) {
           <>Instructor: {course.instructor?.name}</>
         )}
       </p>
+
+       {isInstructor && (
+        <button
+          className="delete-btn"
+          onClick={(e) => {
+            e.stopPropagation(); // ⭐ 阻止跳转
+            onDelete(course);
+          }}
+        >
+          Delete
+        </button>
+      )}
     </div>
   );
 }

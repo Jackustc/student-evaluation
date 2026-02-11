@@ -319,4 +319,42 @@ router.get(
   }
 );
 
+// ✅ 删除课程（带服务器确认机制）
+router.delete(
+  "/:courseId",
+  requireAuth,
+  requireRole("instructor"),
+  async (req, res) => {
+    try {
+      const { courseId } = req.params;
+      const { confirm } = req.body; // ⭐ 在这里读取 confirm
+
+      // ⭐ 如果没有传 confirm=DELETE，直接拒绝
+      if (confirm !== "DELETE") {
+        return res.status(400).json({
+          error: "Confirmation required. Send { confirm: 'DELETE' }",
+        });
+      }
+
+      const course = await db.Course.findByPk(courseId);
+      if (!course) {
+        return res.status(404).json({ error: "Course not found" });
+      }
+
+      // ⭐ 只能删除自己创建的课程
+      if (course.instructorId !== req.user.id) {
+        return res.status(403).json({ error: "Not authorized" });
+      }
+
+      await course.destroy();
+
+      res.json({ message: "Course deleted successfully" });
+    } catch (err) {
+      console.error("❌ Failed to delete course:", err);
+      res.status(500).json({ error: "Server error deleting course" });
+    }
+  }
+);
+
+
 module.exports = router;
