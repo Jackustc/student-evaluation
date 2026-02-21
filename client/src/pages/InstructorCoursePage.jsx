@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useParams, Link } from "react-router-dom";
+import { useParams, Link,useNavigate } from "react-router-dom";
 import api from "../api";
 import "../styles/InstructorCoursePage.css";
 
@@ -23,7 +23,10 @@ export default function InstructorCoursePage() {
   const [editTitle, setEditTitle] = useState("");
   const [editCode, setEditCode] = useState("");
 
+  const navigate = useNavigate();
+
   const [message, setMessage] = useState("");
+
   const showMessage = (text) => {
     setMessage(text);
     setTimeout(() => setMessage(""), 2500);
@@ -121,6 +124,30 @@ export default function InstructorCoursePage() {
     } catch (err) {
       console.error(err);
       showMessage("❌ Failed to get QR code");
+    }
+  };
+
+  const handleDeleteCourse = async () => {
+    const confirmed = window.prompt(
+      `Please enter the course title to confirm deletion:\n${course.title}`
+    );
+
+    // ⭐ 先判断用户是否点了 Cancel
+    if (!confirmed || confirmed.trim() !== course.title) {
+      showMessage("❌ Course title mismatch. Deletion cancelled.");
+      return;
+    }
+
+    try {
+      await api.delete(`/courses/${id}`, {
+        data: { confirmTitle: confirmed.trim() },
+      });
+
+      showMessage("✅ Course deleted successfully");
+      setTimeout(() => navigate("/instructor"), 800);
+    } catch (err) {
+      console.error(err);
+      showMessage(err.response?.data?.error || "❌ Failed to delete course");
     }
   };
 
@@ -370,6 +397,14 @@ export default function InstructorCoursePage() {
           </Link>
         </div>
       </section>
+      
+      <section className="card-section danger-zone">
+        <h3>Danger Zone</h3>
+        <button className="btn-delete-course" onClick={handleDeleteCourse}>
+          Delete Course
+        </button>
+      </section>
     </div>
+    
   );
 }

@@ -5,8 +5,9 @@ import "../styles/LoginPage.css";
 
 export default function LoginPage() {
   const { login, register, user } = useAuthStore();
-  // const [email, setEmail] = useState("");
-  const [email, setEmail] = useState("@northeastern.edu");
+  const [email, setEmail] = useState("");
+  // const [email, setEmail] = useState("@northeastern.edu");
+
 
   const [password, setPassword] = useState("");
   const [name, setName] = useState("");

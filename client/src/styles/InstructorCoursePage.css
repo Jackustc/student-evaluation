@@ -230,3 +230,21 @@
   font-weight: 500;
   color: #333;
 } */
+
+.danger-zone {
+  /* border: 1px solid #ff4d4f; */
+  /* background: #fff5f5; */
+}
+
+.btn-delete-course {
+  background-color: #ff4d4f;
+  color: white;
+  padding: 8px 14px;
+  border: none;
+  cursor: pointer;
+  /* border-radius: 6px; */
+}
+
+.btn-delete-course:hover {
+  background-color: #d9363e;
+}

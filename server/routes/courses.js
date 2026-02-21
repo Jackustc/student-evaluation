@@ -327,27 +327,27 @@ router.delete(
   async (req, res) => {
     try {
       const { courseId } = req.params;
-      const { confirm } = req.body; // ⭐ 在这里读取 confirm
-
-      // ⭐ 如果没有传 confirm=DELETE，直接拒绝
-      if (confirm !== "DELETE") {
-        return res.status(400).json({
-          error: "Confirmation required. Send { confirm: 'DELETE' }",
-        });
-      }
+      const { confirmTitle } = req.body; // 👈 改成 confirmTitle
 
       const course = await db.Course.findByPk(courseId);
-      if (!course) {
-        return res.status(404).json({ error: "Course not found" });
-      }
+      if (!course) return res.status(404).json({ error: "Course not found" });
 
-      // ⭐ 只能删除自己创建的课程
       if (course.instructorId !== req.user.id) {
         return res.status(403).json({ error: "Not authorized" });
       }
 
-      await course.destroy();
 
+      console.log("confirmTitle =", confirmTitle);
+      console.log("course.title =", course.title);
+
+      // ✅ 输入课程标题确认
+      if ((confirmTitle || "").trim() !== course.title) {
+        return res.status(400).json({
+          error: `Confirmation required. Send { confirmTitle: "${course.title}" }`,
+        });
+      }
+
+      await course.destroy();
       res.json({ message: "Course deleted successfully" });
     } catch (err) {
       console.error("❌ Failed to delete course:", err);
