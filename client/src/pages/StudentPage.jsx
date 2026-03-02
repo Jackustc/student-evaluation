@@ -8,6 +8,8 @@ export default function StudentPage() {
   const [courses, setCourses] = useState([]);
   const [loading, setLoading] = useState(false);
 
+  console.log("courses:", courses);
+
   // ✅ 页面加载时获取已加入的课程
   useEffect(() => {
     const fetchCourses = async () => {
@@ -65,11 +67,13 @@ export default function StudentPage() {
       {courses.length === 0 ? (
         <p className="empty-msg">You have not joined any courses yet.</p>
       ) : (
-        <div className="course-grid">
-          {courses.map((c) => (
-            <CourseCard key={c.id} course={c} />
-          ))}
-        </div>
+       <div className="course-grid">
+          {courses
+            .filter((c) => c !== null)
+            .map((c) => (
+              <CourseCard key={c.id} course={c} />
+            ))}
+      </div>
       )}
     </div>
   );

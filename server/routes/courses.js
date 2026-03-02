@@ -165,6 +165,7 @@ router.get("/joined", requireAuth, requireRole("student"), async (req, res) => {
       include: [
         {
           model: db.Course,
+          required: true, 
           include: [
             {
               model: db.User,
@@ -175,7 +176,11 @@ router.get("/joined", requireAuth, requireRole("student"), async (req, res) => {
         },
       ],
     });
-    res.json(enrollments.map((e) => e.Course));
+    res.json(
+      enrollments
+        .map((e) => e.Course)
+        .filter((course) => course !== null)
+    );
   } catch (err) {
     res.status(500).json({ error: err.message });
   }

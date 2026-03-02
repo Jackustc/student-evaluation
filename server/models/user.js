@@ -11,9 +11,23 @@ module.exports = (sequelize, DataTypes) => {
   });
 
   User.associate = (models) => {
-    User.hasMany(models.Course, { foreignKey: "instructorId" });
-    User.hasMany(models.Enrollment, { foreignKey: "userId" });
-    User.hasMany(models.TeamMembership, { foreignKey: "userId" });
+    User.hasMany(models.Course, {
+      foreignKey: "instructorId",
+      onDelete: "CASCADE",
+      hooks: true,
+    });
+
+    User.hasMany(models.Enrollment, {
+      foreignKey: "userId",
+      onDelete: "CASCADE",
+      hooks: true,
+    });
+
+    User.hasMany(models.TeamMembership, {
+      foreignKey: "userId",
+      onDelete: "CASCADE",
+      hooks: true,
+    });
 
     // Evaluation 关系
     User.hasMany(models.Evaluation, {

@@ -11,9 +11,18 @@ module.exports = (sequelize, DataTypes) => {
     Course.belongsTo(models.User, {
       as: "instructor",
       foreignKey: "instructorId",
+      onDelete: "CASCADE",
     });
-    Course.hasMany(models.Enrollment, { foreignKey: "courseId" });
-    Course.hasMany(models.Team, { foreignKey: "courseId" });
+    Course.hasMany(models.Enrollment, { 
+      foreignKey: "courseId",
+      onDelete: "CASCADE",
+      hooks: true, 
+    });
+    Course.hasMany(models.Team, { 
+      foreignKey: "courseId",
+      onDelete: "CASCADE",
+      hooks: true, 
+    });
   };
 
   return Course;

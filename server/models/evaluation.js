@@ -6,18 +6,27 @@ module.exports = (sequelize, DataTypes) => {
   });
 
   Evaluation.associate = (models) => {
-    Evaluation.belongsTo(models.Team, { foreignKey: "teamId" });
+    Evaluation.belongsTo(models.Team, {
+      foreignKey: "teamId",
+      onDelete: "CASCADE",
+    });
+
     Evaluation.belongsTo(models.User, {
       as: "evaluator",
       foreignKey: "evaluatorId",
+      onDelete: "CASCADE",
     });
+
     Evaluation.belongsTo(models.User, {
       as: "evaluatee",
       foreignKey: "evaluateeId",
+      onDelete: "CASCADE",
     });
+
     Evaluation.hasMany(models.EvaluationLike, {
       foreignKey: "evaluationId",
       onDelete: "CASCADE",
+      hooks: true,
     });
   };
 

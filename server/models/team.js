@@ -4,10 +4,28 @@ module.exports = (sequelize, DataTypes) => {
   });
 
   Team.associate = (models) => {
-    Team.belongsTo(models.Course, { foreignKey: "courseId" });
-    Team.hasMany(models.TeamMembership, { foreignKey: "teamId" });
-    Team.hasMany(models.Evaluation, { foreignKey: "teamId" });
-    Team.hasMany(models.EvaluationRequest, { foreignKey: "teamId" });
+    Team.belongsTo(models.Course, {
+      foreignKey: "courseId",
+      onDelete: "CASCADE",
+    });
+
+    Team.hasMany(models.TeamMembership, {
+      foreignKey: "teamId",
+      onDelete: "CASCADE",
+      hooks: true,
+    });
+
+    Team.hasMany(models.Evaluation, {
+      foreignKey: "teamId",
+      onDelete: "CASCADE",
+      hooks: true,
+    });
+
+    Team.hasMany(models.EvaluationRequest, {
+      foreignKey: "teamId",
+      onDelete: "CASCADE",
+      hooks: true,
+    });
   };
 
   return Team;
