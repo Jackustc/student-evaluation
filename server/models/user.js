@@ -8,6 +8,9 @@ module.exports = (sequelize, DataTypes) => {
       defaultValue: "student",
     },
     studentId: { type: DataTypes.STRING, allowNull: true },
+
+    resetToken: { type: DataTypes.STRING, allowNull: true },
+    resetTokenExpiry: { type: DataTypes.DATE, allowNull: true },
   });
 
   User.associate = (models) => {
