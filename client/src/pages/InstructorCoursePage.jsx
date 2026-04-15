@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useParams, Link,useNavigate } from "react-router-dom";
+import { useParams, Link, useNavigate } from "react-router-dom";
 import api from "../api";
 import "../styles/InstructorCoursePage.css";
 
@@ -45,6 +45,9 @@ export default function InstructorCoursePage() {
           api.get(`/courses/${id}/roster`),
           api.get(`/courses/${id}/teams`),
         ]);
+
+        console.log("ROSTER DATA 👉", resRoster.data);
+
         setRoster(resRoster.data);
         setTeams(resTeams.data);
       } catch (err) {
@@ -129,7 +132,7 @@ export default function InstructorCoursePage() {
 
   const handleDeleteCourse = async () => {
     const confirmed = window.prompt(
-      `Please enter the course title to confirm deletion:\n${course.title}`
+      `Please enter the course title to confirm deletion:\n${course.title}`,
     );
 
     // ⭐ 先判断用户是否点了 Cancel
@@ -343,9 +346,62 @@ export default function InstructorCoursePage() {
               <p>No students enrolled yet.</p>
             ) : (
               roster.map((s) => (
-                <li key={s.id}>
-                  {s.name} <span className="email">({s.email})</span>
-                  <div className="roster-actions">
+                <li
+                  key={s.id}
+                  style={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                    padding: "6px 0",
+                    borderBottom: "1px solid #eee",
+                  }}
+                >
+                  <div
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "10px",
+                      flex: 1,
+                    }}
+                  >
+                    <Link
+                      to={`/instructor/courses/${id}/students/${s.id}`}
+                      className="student-link"
+                    >
+                      {s.name}
+                    </Link>
+
+                    <span style={{ display: "inline-flex", gap: "6px" }}>
+                      <span
+                        style={{
+                          background: "#ede9fe",
+                          color: "#4f46e5",
+                          padding: "2px 8px",
+                          borderRadius: "99px",
+                          fontSize: "12px",
+                          fontWeight: 500,
+                        }}
+                      >
+                        Sent {s.givenCount}
+                      </span>
+                      <span
+                        style={{
+                          background: "#ede9fe",
+                          color: "#4f46e5",
+                          padding: "2px 8px",
+                          borderRadius: "99px",
+                          fontSize: "12px",
+                          fontWeight: 500,
+                        }}
+                      >
+                        Received {s.receivedCount}
+                      </span>
+                    </span>
+
+                    <span className="email">({s.email})</span>
+                  </div>
+
+                  <div style={{ display: "flex", gap: "6px" }}>
                     <Link
                       to={`/courses/${id}/evaluations/give?student=${s.id}`}
                     >
@@ -397,7 +453,7 @@ export default function InstructorCoursePage() {
           </Link>
         </div>
       </section>
-      
+
       <section className="card-section danger-zone">
         <h3>Danger Zone</h3>
         <button className="btn-delete-course" onClick={handleDeleteCourse}>
@@ -405,6 +461,5 @@ export default function InstructorCoursePage() {
         </button>
       </section>
     </div>
-    
   );
 }

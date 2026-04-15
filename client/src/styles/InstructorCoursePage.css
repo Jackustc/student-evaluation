@@ -1,7 +1,5 @@
 .instructor-course-page {
-  /* max-width: 900px; */
   min-height: 100vh;
-  /* margin: 40px auto; */
   padding: 24px;
   font-family: "Inter", sans-serif;
   color: #333;
@@ -18,7 +16,7 @@
 .edit-basic-form {
   display: flex;
   flex-direction: column;
-  gap: 12px; /* 行间距 */
+  gap: 12px;
   margin-top: 12px;
 }
 
@@ -44,38 +42,15 @@
   outline: none;
 }
 
-/* Save / Cancel 按钮行对齐 */
-.desc-buttons {
-  display: flex;
-  gap: 10px;
-  margin-top: 8px;
-}
-
 .course-meta {
   color: #666;
   margin-bottom: 24px;
 }
 
-.course-desc {
-  margin-top: 8px;
-  color: #444;
-  white-space: pre-wrap;
-}
-
-.desc-input {
-  width: 100%;
-  padding: 8px;
-  border: 1px solid #ccc;
-  border-radius: 6px;
-  font-family: inherit;
-  resize: vertical;
-}
-
-/* 卡片区块 */
+/* === Card Section === */
 .card-section {
   background: #ffffff;
   padding: 16px 20px;
-  /* border-radius: 10px; */
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
   margin-bottom: 24px;
   transition: all 0.2s ease-in-out;
@@ -89,7 +64,18 @@
   margin: 1px;
 }
 
-/* === Description Section === */
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.section-header h3 {
+  margin: 1px;
+}
+
+/* === Description === */
 .course-desc {
   margin-top: 8px;
   color: #444;
@@ -104,48 +90,45 @@
   width: 100%;
   padding: 10px;
   border: 1px solid #ccc;
-  /* border-radius: 6px; */
   font-family: inherit;
   resize: vertical;
   margin-top: 8px;
 }
 
-/* 按钮区域 */
 .desc-buttons {
   display: flex;
   gap: 8px;
+  margin-top: 8px;
 }
 
+/* === Buttons === */
 .btn-edit,
 .btn-save,
-.btn-cancel {
+.btn-cancel,
+.btn-ai {
   padding: 6px 12px;
   border: none;
-  /* border-radius: 6px; */
   cursor: pointer;
   font-size: 14px;
   transition: background 0.2s;
 }
 
-/* 不同状态颜色 */
 .btn-edit {
   background-color: #7874c9;
   color: white;
 }
 
-.btn-save {
-  /* background-color: #4caf50; */
-  /* color: white; */
-}
-
-.btn-cancel {
-  /* background-color: #f44336; */
-  /* color: white; */
-}
-
-/* 悬停效果 */
 .btn-edit:hover {
   background-color: #615dc0;
+}
+
+.btn-ai {
+  background-color: #a78bfa;
+  color: white;
+}
+
+.btn-ai:hover {
+  background-color: #9061f9;
 }
 
 .btn-save:hover {
@@ -154,17 +137,6 @@
 
 .btn-cancel:hover {
   background-color: #d6d6d6;
-}
-
-.section-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 8px;
-}
-
-.section-header h3 {
-  margin: 1px;
 }
 
 .token-display {
@@ -180,7 +152,6 @@
   background-color: #6366f1;
   color: white;
   border: none;
-  /* border-radius: 6px; */
   cursor: pointer;
   font-size: 14px;
   transition: background 0.2s;
@@ -197,6 +168,7 @@
   text-align: center;
 }
 
+/* === Roster === */
 .roster-list {
   list-style: none;
   padding-left: 0;
@@ -204,8 +176,43 @@
 }
 
 .roster-list li {
-  padding: 6px 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 0;
   border-bottom: 1px solid #eee;
+}
+
+.roster-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex: 1;
+  min-width: 0;
+  flex-wrap: wrap;
+}
+
+.roster-actions {
+  display: flex;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.counts {
+  display: flex;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.badge {
+  background: #ede9fe;
+  color: #4f46e5;
+  padding: 2px 8px;
+  border-radius: 99px;
+  font-size: 12px;
+  font-weight: 500;
+  white-space: nowrap;
 }
 
 .email {
@@ -213,36 +220,69 @@
   font-size: 0.9em;
 }
 
+.student-link {
+  color: #2563eb;
+  cursor: pointer;
+  text-decoration: none;
+  font-weight: 500;
+  max-width: 160px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.student-link:hover {
+  text-decoration: underline;
+}
+
+/* === Roster action buttons === */
+.btn-small {
+  padding: 4px 10px;
+  font-size: 12px;
+  border: none;
+  cursor: pointer;
+  transition: background 0.2s;
+  background-color: #ede9fe;
+  color: #4f46e5;
+  font-weight: 500;
+  border-radius: 99px;
+}
+
+.btn-small:hover {
+  background-color: #ddd6fe;
+}
+
+/* === Teams === */
 .team-list {
   list-style: none;
   padding-left: 0;
 }
 
-/* .team-item {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 8px 0;
-  border-bottom: 1px solid #eee;
-}
-
-.team-item span {
+/* === Evaluations === */
+.btn-seek,
+.btn-request {
+  padding: 6px 14px;
+  font-size: 14px;
+  border: none;
+  cursor: pointer;
+  transition: background 0.2s;
+  background-color: #ede9fe;
+  color: #4f46e5;
   font-weight: 500;
-  color: #333;
-} */
-
-.danger-zone {
-  /* border: 1px solid #ff4d4f; */
-  /* background: #fff5f5; */
 }
 
+.btn-seek:hover,
+.btn-request:hover {
+  background-color: #ddd6fe;
+}
+
+/* === Danger Zone === */
 .btn-delete-course {
   background-color: #ff4d4f;
   color: white;
   padding: 8px 14px;
   border: none;
   cursor: pointer;
-  /* border-radius: 6px; */
 }
 
 .btn-delete-course:hover {

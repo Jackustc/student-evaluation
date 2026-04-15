@@ -1,0 +1,64 @@
+.page-container {
+  padding: 24px;
+  max-width: 900px;
+  margin: auto;
+}
+
+.card {
+  background: white;
+  border-radius: 12px;
+  padding: 16px 20px;
+  margin-bottom: 20px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+}
+
+.section-title {
+  font-size: 18px;
+  font-weight: 600;
+  margin-bottom: 12px;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.table th {
+  text-align: left;
+  font-size: 13px;
+  color: gray;
+  padding-bottom: 8px;
+}
+
+.table td {
+  padding: 8px 0;
+  border-top: 1px solid #eee;
+}
+
+.empty {
+  color: #999;
+  font-size: 14px;
+}
+
+.score {
+  font-weight: bold;
+  color: #f59e0b;
+}
+
+
+.section-title {
+  font-size: 18px;
+  font-weight: 600;
+  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.count {
+  background: #f3f4f6;
+  color: #333;
+  font-size: 13px;
+  padding: 2px 8px;
+  border-radius: 999px;
+}

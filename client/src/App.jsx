@@ -26,6 +26,7 @@ import AdminHome from "./pages/admin/AdminHome";
 import AdminInstructors from "./pages/admin/AdminInstructors";
 import AdminCourses from "./pages/admin/AdminCourses";
 import AdminCourseStudents from "./pages/admin/AdminCourseStudents";
+import InstructorStudentEvaluationsPage from "./pages/InstructorStudentEvaluationsPage";
 
 function AppContent() {
   const location = useLocation();
@@ -53,6 +54,15 @@ function AppContent() {
         <Route
           path="/instructor/courses/:id"
           element={<InstructorCoursePage />}
+        />
+
+        <Route
+          path="/instructor/courses/:courseId/students/:studentId"
+          element={
+            <ProtectedRoute role="instructor">
+              <InstructorStudentEvaluationsPage />
+            </ProtectedRoute>
+          }
         />
 
         <Route

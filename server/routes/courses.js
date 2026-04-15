@@ -206,6 +206,151 @@ router.post("/:courseId/teams", requireAuth, async (req, res) => {
   }
 });
 
+// ✅ 老师查看某个学生在该课程的 evaluation history
+router.get(
+  "/:courseId/students/:studentId/evaluation-history",
+  requireAuth,
+  requireRole("instructor"),
+  async (req, res) => {
+    try {
+      const { courseId, studentId } = req.params;
+
+      // =============================
+      // 1️⃣ 校验 course 是否存在
+      // =============================
+      const course = await db.Course.findByPk(courseId);
+      if (!course) {
+        return res.status(404).json({ error: "Course not found" });
+      }
+
+      // =============================
+      // 2️⃣ 权限校验：必须是该 instructor
+      // =============================
+      if (course.instructorId !== req.user.id) {
+        return res.status(403).json({ error: "Not authorized" });
+      }
+
+      // =============================
+      // 3️⃣ 校验 student 是否在该课程
+      // =============================
+      const enrollment = await db.Enrollment.findOne({
+        where: {
+          courseId,
+          userId: studentId,
+        },
+      });
+
+      if (!enrollment) {
+        return res.status(403).json({
+          error: "Student not enrolled in this course",
+        });
+      }
+
+      // =============================
+      // 4️⃣ 获取 student 基本信息
+      // =============================
+      const student = await db.User.findByPk(studentId, {
+        attributes: ["id", "name", "email", "studentId"],
+      });
+
+      // =============================
+      // 5️⃣ 查询：Given Evaluations
+      // =============================
+      const given = await db.Evaluation.findAll({
+        where: { evaluatorId: studentId },
+        include: [
+          {
+            model: db.Team,
+            where: { courseId },
+            attributes: ["id", "name"],
+          },
+          {
+            model: db.User,
+            as: "evaluatee",
+            attributes: ["id", "name", "email"],
+          },
+        ],
+        order: [["createdAt", "DESC"]],
+      });
+
+      // =============================
+      // 6️⃣ 查询：Received Evaluations
+      // =============================
+      const received = await db.Evaluation.findAll({
+        where: { evaluateeId: studentId },
+        include: [
+          {
+            model: db.Team,
+            where: { courseId },
+            attributes: ["id", "name"],
+          },
+          {
+            model: db.User,
+            as: "evaluator",
+            attributes: ["id", "name", "email"],
+          },
+        ],
+        order: [["createdAt", "DESC"]],
+      });
+
+      // =============================
+      // 7️⃣ 查询：Requests Sent
+      // =============================
+      const requestsSent = await db.EvaluationRequest.findAll({
+        where: { requesterId: studentId },
+        include: [
+          {
+            model: db.Team,
+            where: { courseId },
+            attributes: ["id", "name"],
+          },
+          {
+            model: db.User,
+            as: "Requestee",
+            attributes: ["id", "name", "email"],
+          },
+        ],
+        order: [["createdAt", "DESC"]],
+      });
+
+      // =============================
+      // 8️⃣ 查询：Requests Received
+      // =============================
+      const requestsReceived = await db.EvaluationRequest.findAll({
+        where: { requesteeId: studentId },
+        include: [
+          {
+            model: db.Team,
+            where: { courseId },
+            attributes: ["id", "name"],
+          },
+          {
+            model: db.User,
+            as: "Requester",
+            attributes: ["id", "name", "email"],
+          },
+        ],
+        order: [["createdAt", "DESC"]],
+      });
+
+      // =============================
+      // 9️⃣ 返回数据
+      // =============================
+      res.json({
+        student,
+        given,
+        received,
+        requestsSent,
+        requestsReceived,
+      });
+    } catch (err) {
+      console.error("❌ Failed to fetch evaluation history:", err);
+      res.status(500).json({
+        error: "Server error fetching evaluation history",
+      });
+    }
+  }
+);
 // ✅ 获取单个课程详情
 router.get("/:courseId", requireAuth, async (req, res) => {
   try {
@@ -248,6 +393,7 @@ router.get("/:courseId/teams", requireAuth, async (req, res) => {
 });
 
 // ✅ 老师查看课程学生
+// ✅ 老师查看课程学生（带统计）
 router.get(
   "/:courseId/roster",
   requireAuth,
@@ -256,15 +402,55 @@ router.get(
     try {
       const { courseId } = req.params;
 
-      // 找出课程及已选学生
+      // 1️⃣ 找 enrollment + user
       const enrollments = await db.Enrollment.findAll({
         where: { courseId },
         include: [
-          { model: db.User, attributes: ["id", "name", "email", "studentId"] },
+          {
+            model: db.User,
+            attributes: ["id", "name", "email", "studentId"],
+          },
         ],
       });
 
-      const roster = enrollments.map((e) => e.User);
+      // 2️⃣ 遍历每个 student 加统计
+      const roster = await Promise.all(
+        enrollments.map(async (e) => {
+          const user = e.User;
+
+          // ⭐ given count
+          const givenCount = await db.Evaluation.count({
+            where: { evaluatorId: user.id },
+            include: [
+              {
+                model: db.Team,
+                where: { courseId },
+              },
+            ],
+          });
+
+          // ⭐ received count
+          const receivedCount = await db.Evaluation.count({
+            where: { evaluateeId: user.id },
+            include: [
+              {
+                model: db.Team,
+                where: { courseId },
+              },
+            ],
+          });
+
+          return {
+            id: user.id,
+            name: user.name,
+            email: user.email,
+            studentId: user.studentId,
+            givenCount,
+            receivedCount,
+          };
+        })
+      );
+
       res.json(roster);
     } catch (err) {
       console.error("❌ Failed to fetch roster:", err);
@@ -272,6 +458,8 @@ router.get(
     }
   }
 );
+
+
 
 // ✅ 刷新 Join Token
 router.post(
