@@ -1,9 +1,11 @@
-import { useEffect, useState } from "react";
+import { useRef, useEffect, useState } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import api from "../api";
 import "../styles/InstructorCoursePage.css";
 
 export default function InstructorCoursePage() {
+  const fileInputRef = useRef(null);
+
   const { id } = useParams();
   const [course, setCourse] = useState(null);
   const [roster, setRoster] = useState([]);
@@ -27,9 +29,34 @@ export default function InstructorCoursePage() {
 
   const [message, setMessage] = useState("");
 
+  const [csvFile, setCsvFile] = useState(null);
+  const [uploadingCsv, setUploadingCsv] = useState(false);
+  const [importSummary, setImportSummary] = useState(null);
+
   const showMessage = (text) => {
     setMessage(text);
     setTimeout(() => setMessage(""), 2500);
+  };
+
+  const fetchRoster = async () => {
+    try {
+      const resRoster = await api.get(`/courses/${id}/roster`);
+      console.log("ROSTER DATA 👉", resRoster.data);
+      setRoster(resRoster.data);
+    } catch (err) {
+      console.error("Failed to load roster:", err);
+      showMessage("❌ Failed to load roster");
+    }
+  };
+
+  const fetchTeams = async () => {
+    try {
+      const resTeams = await api.get(`/courses/${id}/teams`);
+      setTeams(resTeams.data);
+    } catch (err) {
+      console.error("Failed to load teams:", err);
+      showMessage("❌ Failed to load teams");
+    }
   };
 
   useEffect(() => {
@@ -41,20 +68,13 @@ export default function InstructorCoursePage() {
         setDescription(found?.description || "");
         setJoinToken(found?.joinToken);
 
-        const [resRoster, resTeams] = await Promise.all([
-          api.get(`/courses/${id}/roster`),
-          api.get(`/courses/${id}/teams`),
-        ]);
-
-        console.log("ROSTER DATA 👉", resRoster.data);
-
-        setRoster(resRoster.data);
-        setTeams(resTeams.data);
+        await Promise.all([fetchRoster(), fetchTeams()]);
       } catch (err) {
         console.error("Failed to load course:", err);
         showMessage("Failed to load course data. Please check login status.");
       }
     }
+
     fetchData();
   }, [id]);
 
@@ -127,6 +147,44 @@ export default function InstructorCoursePage() {
     } catch (err) {
       console.error(err);
       showMessage("❌ Failed to get QR code");
+    }
+  };
+
+  const handleUploadCsv = async () => {
+    if (!csvFile) {
+      showMessage("❌ Please select a CSV file first");
+      return;
+    }
+
+    try {
+      setUploadingCsv(true);
+      setImportSummary(null);
+
+      const formData = new FormData();
+      formData.append("file", csvFile);
+
+      const res = await api.post(`/courses/${id}/roster/import-csv`, formData);
+
+      setImportSummary(res.data.summary);
+      showMessage("✅ CSV imported successfully");
+
+      // 上传成功后刷新 roster
+      await fetchRoster();
+
+      // 清空已选文件
+      setCsvFile(null);
+    } catch (err) {
+      console.error("CSV upload failed:", err);
+
+      console.log("👉 backend response:", err.response?.data);
+
+      showMessage(
+        err.response?.data?.error ||
+          JSON.stringify(err.response?.data) ||
+          "❌ Failed to import CSV",
+      );
+    } finally {
+      setUploadingCsv(false);
     }
   };
 
@@ -339,6 +397,62 @@ export default function InstructorCoursePage() {
           >
             {showRoster ? " Hide Roster" : "Show Roster"}
           </button>
+        </div>
+        <div className="csv-upload-section">
+          <h4 style={{ marginBottom: "8px" }}>Import Students by CSV</h4>
+
+          <div className="csv-upload-row">
+            <input
+              className="csv-input"
+              ref={fileInputRef}
+              type="file"
+              accept=".csv"
+              onChange={(e) => {
+                const selected = e.target.files?.[0] || null;
+                setCsvFile(selected);
+              }}
+            />
+
+            <button
+              className="csv-upload-btn"
+              onClick={handleUploadCsv}
+              disabled={uploadingCsv}
+            >
+              {uploadingCsv ? "Uploading..." : "Upload CSV"}
+            </button>
+          </div>
+
+          {csvFile && (
+            <p className="csv-file-name">Selected file: {csvFile.name}</p>
+          )}
+
+          {importSummary && (
+            <div className="csv-summary">
+              <p>
+                <strong>Import Result</strong>
+              </p>
+              <p>Total Rows: {importSummary.total}</p>
+              <p>Created Users: {importSummary.createdUsers}</p>
+              <p>Existing Users: {importSummary.existingUsers}</p>
+              <p>Created Enrollments: {importSummary.createdEnrollments}</p>
+              <p>Skipped Enrollments: {importSummary.skippedEnrollments}</p>
+
+              {importSummary.errors?.length > 0 && (
+                <div style={{ marginTop: "8px" }}>
+                  <p style={{ color: "red" }}>
+                    Errors: {importSummary.errors.length}
+                  </p>
+                  <ul style={{ marginTop: "6px", paddingLeft: "18px" }}>
+                    {importSummary.errors.map((err, index) => (
+                      <li key={index}>
+                        {err.email || "Unknown email"} — {err.reason}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+            </div>
+          )}
         </div>
         {showRoster && (
           <ul className="roster-list">

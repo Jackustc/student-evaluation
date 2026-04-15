@@ -3,8 +3,30 @@ const { v4: uuidv4 } = require("uuid");
 const QRCode = require("qrcode");
 const { requireAuth, requireRole } = require("../middleware/auth");
 const db = require("../models");
+const multer = require("multer");
+const csv = require("csv-parser");
+const { Readable } = require("stream");
+const { importStudentsToCourse } = require("../services/importStudentsService");
 
 const router = express.Router();
+
+const upload = multer({
+  storage: multer.memoryStorage(),
+  limits: { fileSize: 2 * 1024 * 1024 },
+});
+
+function parseCsvBuffer(buffer) {
+  return new Promise((resolve, reject) => {
+    const rows = [];
+    const stream = Readable.from(buffer);
+
+    stream
+      .pipe(csv())
+      .on("data", (row) => rows.push(row))
+      .on("end", () => resolve(rows))
+      .on("error", reject);
+  });
+}
 
 // 老师建课
 router.post("/", requireAuth, requireRole("instructor"), async (req, res) => {
@@ -63,7 +85,7 @@ router.get(
     } catch (err) {
       res.status(500).json({ error: err.message });
     }
-  }
+  },
 );
 
 // ✅ 老师更新课程描述
@@ -91,7 +113,7 @@ router.patch(
       console.error("❌ Failed to update course description:", err);
       res.status(500).json({ error: "Server error updating description" });
     }
-  }
+  },
 );
 
 // ✅ 更新 Course title & code
@@ -126,7 +148,7 @@ router.patch(
       console.error("❌ Failed to update basic info:", err);
       res.status(500).json({ error: "Server error updating basic info" });
     }
-  }
+  },
 );
 
 // ✅ 更新 AI Assistant 开关
@@ -153,7 +175,7 @@ router.patch(
       console.error("❌ Failed to update aiEnabled:", err);
       res.status(500).json({ error: "Server error updating aiEnabled" });
     }
-  }
+  },
 );
 
 // 学生获取自己加入的课程
@@ -165,7 +187,7 @@ router.get("/joined", requireAuth, requireRole("student"), async (req, res) => {
       include: [
         {
           model: db.Course,
-          required: true, 
+          required: true,
           include: [
             {
               model: db.User,
@@ -177,9 +199,7 @@ router.get("/joined", requireAuth, requireRole("student"), async (req, res) => {
       ],
     });
     res.json(
-      enrollments
-        .map((e) => e.Course)
-        .filter((course) => course !== null)
+      enrollments.map((e) => e.Course).filter((course) => course !== null),
     );
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -349,7 +369,7 @@ router.get(
         error: "Server error fetching evaluation history",
       });
     }
-  }
+  },
 );
 // ✅ 获取单个课程详情
 router.get("/:courseId", requireAuth, async (req, res) => {
@@ -392,7 +412,6 @@ router.get("/:courseId/teams", requireAuth, async (req, res) => {
   }
 });
 
-// ✅ 老师查看课程学生
 // ✅ 老师查看课程学生（带统计）
 router.get(
   "/:courseId/roster",
@@ -448,7 +467,7 @@ router.get(
             givenCount,
             receivedCount,
           };
-        })
+        }),
       );
 
       res.json(roster);
@@ -456,10 +475,58 @@ router.get(
       console.error("❌ Failed to fetch roster:", err);
       res.status(500).json({ error: "Server error fetching roster" });
     }
-  }
+  },
 );
 
+// ✅ 老师上传 CSV 自动注册学生 + 加入课程
+router.post(
+  "/:courseId/roster/import-csv",
+  requireAuth,
+  requireRole("instructor"),
+  upload.single("file"),
+  async (req, res) => {
+    try {
+      const { courseId } = req.params;
 
+      // 1️⃣ 必须有文件
+      if (!req.file) {
+        return res.status(400).json({ error: "No file uploaded" });
+      }
+
+      // 2️⃣ 找课程
+      const course = await db.Course.findByPk(courseId);
+      if (!course) {
+        return res.status(404).json({ error: "Course not found" });
+      }
+
+      // 3️⃣ 权限
+      if (course.instructorId !== req.user.id) {
+        return res.status(403).json({ error: "Not authorized" });
+      }
+
+      // 4️⃣ 直接解析 CSV（🔥核心，不做类型判断）
+      const rows = await parseCsvBuffer(req.file.buffer);
+
+      // 5️⃣ 调用你已有的导入逻辑
+      const summary = await importStudentsToCourse({
+        courseId,
+        rows,
+      });
+
+      // 6️⃣ 返回结果
+      res.json({
+        message: "ok",
+        summary,
+      });
+    } catch (err) {
+      console.error("❌ Import failed:", err);
+      res.status(500).json({
+        error: "Import failed",
+        detail: err.message,
+      });
+    }
+  },
+);
 
 // ✅ 刷新 Join Token
 router.post(
@@ -486,7 +553,7 @@ router.post(
       console.error("❌ Failed to rotate token:", err);
       res.status(500).json({ error: "Failed to rotate join token" });
     }
-  }
+  },
 );
 
 // ✅ 生成课程 Join QR
@@ -509,7 +576,7 @@ router.get(
       console.error("❌ Failed to generate QR:", err);
       res.status(500).json({ error: "Server error generating QR" });
     }
-  }
+  },
 );
 
 // ✅ 删除课程（带服务器确认机制）
@@ -529,7 +596,6 @@ router.delete(
         return res.status(403).json({ error: "Not authorized" });
       }
 
-
       console.log("confirmTitle =", confirmTitle);
       console.log("course.title =", course.title);
 
@@ -546,8 +612,7 @@ router.delete(
       console.error("❌ Failed to delete course:", err);
       res.status(500).json({ error: "Server error deleting course" });
     }
-  }
+  },
 );
-
 
 module.exports = router;

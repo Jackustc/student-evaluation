@@ -288,3 +288,92 @@
 .btn-delete-course:hover {
   background-color: #d9363e;
 }
+
+/* === CSV Upload Section === */
+
+.csv-upload-section {
+  margin-bottom: 16px;
+  padding: 14px;
+  background: #f9fafb;
+  border: 1px dashed #c7d2fe;
+  border-radius: 10px;
+  transition: all 0.2s ease;
+}
+
+.csv-upload-section:hover {
+  background: #f5f7ff;
+}
+
+.csv-upload-row {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+/* 文件选择 */
+.csv-input {
+  font-size: 14px;
+  padding: 6px;
+  border-radius: 6px;
+  border: 1px solid #ddd;
+  background: white;
+  cursor: pointer;
+}
+
+.csv-input:hover {
+  border-color: #6366f1;
+}
+
+/* 上传按钮 */
+.csv-upload-btn {
+  padding: 6px 14px;
+  background-color: #6366f1;
+  color: white;
+  border: none;
+  cursor: pointer;
+  font-size: 14px;
+  border-radius: 6px;
+  transition: all 0.2s;
+}
+
+.csv-upload-btn:hover {
+  background-color: #4f46e5;
+}
+
+.csv-upload-btn:disabled {
+  background-color: #aaa;
+  cursor: not-allowed;
+}
+
+/* 文件名 */
+.csv-file-name {
+  margin-top: 8px;
+  font-size: 13px;
+  color: #555;
+}
+
+/* Summary 卡片 */
+.csv-summary {
+  margin-top: 12px;
+  padding: 12px;
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  font-size: 14px;
+}
+
+.csv-summary p {
+  margin: 4px 0;
+}
+
+/* error list */
+.csv-summary ul {
+  margin-top: 6px;
+  padding-left: 18px;
+}
+
+.csv-summary li {
+  font-size: 13px;
+  color: #b91c1c;
+}
