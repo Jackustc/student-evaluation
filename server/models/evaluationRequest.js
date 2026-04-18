@@ -5,6 +5,11 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.INTEGER,
       allowNull: true,
     },
+    // ⭐ 新增（核心）
+    courseId: {
+      type: DataTypes.INTEGER,
+      allowNull: true, // ⚠️ 先允许 null（后面再改 NOT NULL）
+    },
     requesterId: {
       type: DataTypes.INTEGER,
       allowNull: false,

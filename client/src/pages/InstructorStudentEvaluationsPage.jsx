@@ -61,8 +61,8 @@ export default function InstructorStudentEvaluationsPage() {
             <tbody>
               {given.map((g) => (
                 <tr key={g.id}>
-                  <td>{g.evaluatee.name}</td>
-                  <td>{g.Team.name}</td>
+                  <td>{g.evaluatee?.name || "Unknown"}</td>
+                  <td>{g.Team?.name || "Instructor"}</td>
                   <td className="score">⭐ {g.score}</td>
                   <td>{g.comment}</td>
                 </tr>
@@ -98,8 +98,8 @@ export default function InstructorStudentEvaluationsPage() {
             <tbody>
               {received.map((r) => (
                 <tr key={r.id}>
-                  <td>{r.evaluator.name}</td>
-                  <td>{r.Team.name}</td>
+                  <td>{r.evaluator?.name || "Unknown"}</td>
+                  <td>{r.Team?.name || "Instructor "}</td>
                   <td className="score">⭐ {r.score}</td>
                   <td>
                     {r.comment}
@@ -141,8 +141,8 @@ export default function InstructorStudentEvaluationsPage() {
             <tbody>
               {requestsSent.map((r) => (
                 <tr key={r.id}>
-                  <td>{r.Requestee.name}</td>
-                  <td>{r.Team.name}</td>
+                  <td>{r.Requestee?.name || "Unknown"}</td>
+                  <td>{r.Team?.name || "Instructor"}</td>
                   <td>{r.status}</td>
                 </tr>
               ))}
@@ -178,8 +178,8 @@ export default function InstructorStudentEvaluationsPage() {
             <tbody>
               {requestsReceived.map((r) => (
                 <tr key={r.id}>
-                  <td>{r.Requester.name}</td>
-                  <td>{r.Team.name}</td>
+                  <td>{r.Requester?.name || "Unknown"}</td>
+                  <td>{r.Team?.name || "Instructor"}</td>
                   <td>{r.status}</td>
                 </tr>
               ))}

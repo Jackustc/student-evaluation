@@ -47,6 +47,7 @@ router.post("/teams/:teamId/evaluations", requireAuth, async (req, res) => {
   // ✅ 确认通过后再创建互评
   const evalObj = await db.Evaluation.create({
     teamId,
+    courseId: team.courseId,
     evaluatorId,
     evaluateeId,
     score,
@@ -103,8 +104,8 @@ router.get("/teams/:teamId/evaluations/me", requireAuth, async (req, res) => {
         isInstructor
           ? e.evaluator.name
           : e.anonymousToPeers && e.evaluatorId !== req.user.id
-          ? "Anonymous"
-          : e.evaluator.name,
+            ? "Anonymous"
+            : e.evaluator.name,
       createdAt: e.createdAt,
     }));
 
@@ -151,7 +152,7 @@ router.get(
       console.error("❌ Error fetching given evaluations:", err);
       res.status(500).json({ error: err.message });
     }
-  }
+  },
 );
 
 // ✅ 获取当前小组所有评价（学生端+老师区分匿名）
@@ -278,6 +279,7 @@ router.post("/courses/:courseId/evaluations", requireAuth, async (req, res) => {
     // ✅ 创建 Evaluation（不依赖 teamId）
     const evaluation = await db.Evaluation.create({
       teamId,
+      courseId: courseId,
       evaluatorId,
       evaluateeId,
       score,

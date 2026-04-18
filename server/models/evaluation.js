@@ -3,6 +3,8 @@ module.exports = (sequelize, DataTypes) => {
     score: DataTypes.INTEGER,
     comment: DataTypes.TEXT,
     anonymousToPeers: { type: DataTypes.BOOLEAN, defaultValue: false },
+
+    courseId: DataTypes.INTEGER,
   });
 
   Evaluation.associate = (models) => {

@@ -277,11 +277,14 @@ router.get(
       // 5️⃣ 查询：Given Evaluations
       // =============================
       const given = await db.Evaluation.findAll({
-        where: { evaluatorId: studentId },
+        where: {
+          evaluatorId: studentId,
+          courseId: courseId, // ⭐ 核心
+        },
         include: [
           {
             model: db.Team,
-            where: { courseId },
+            required: false, // ⭐ 关键
             attributes: ["id", "name"],
           },
           {
@@ -297,11 +300,14 @@ router.get(
       // 6️⃣ 查询：Received Evaluations
       // =============================
       const received = await db.Evaluation.findAll({
-        where: { evaluateeId: studentId },
+        where: {
+          evaluateeId: studentId,
+          courseId: courseId, // ⭐ 核心
+        },
         include: [
           {
             model: db.Team,
-            where: { courseId },
+            required: false, // ⭐ 关键
             attributes: ["id", "name"],
           },
           {
@@ -317,11 +323,14 @@ router.get(
       // 7️⃣ 查询：Requests Sent
       // =============================
       const requestsSent = await db.EvaluationRequest.findAll({
-        where: { requesterId: studentId },
+        where: {
+          requesterId: studentId,
+          courseId: courseId, // ⭐ 核心
+        },
         include: [
           {
             model: db.Team,
-            where: { courseId },
+            required: false,
             attributes: ["id", "name"],
           },
           {
@@ -337,11 +346,14 @@ router.get(
       // 8️⃣ 查询：Requests Received
       // =============================
       const requestsReceived = await db.EvaluationRequest.findAll({
-        where: { requesteeId: studentId },
+        where: {
+          requesteeId: studentId,
+          courseId: courseId, // ⭐ 核心
+        },
         include: [
           {
             model: db.Team,
-            where: { courseId },
+            required: false,
             attributes: ["id", "name"],
           },
           {
@@ -371,6 +383,7 @@ router.get(
     }
   },
 );
+
 // ✅ 获取单个课程详情
 router.get("/:courseId", requireAuth, async (req, res) => {
   try {
@@ -439,24 +452,18 @@ router.get(
 
           // ⭐ given count
           const givenCount = await db.Evaluation.count({
-            where: { evaluatorId: user.id },
-            include: [
-              {
-                model: db.Team,
-                where: { courseId },
-              },
-            ],
+            where: {
+              evaluatorId: user.id,
+              courseId: courseId, // ⭐ 核心
+            },
           });
 
           // ⭐ received count
           const receivedCount = await db.Evaluation.count({
-            where: { evaluateeId: user.id },
-            include: [
-              {
-                model: db.Team,
-                where: { courseId },
-              },
-            ],
+            where: {
+              evaluateeId: user.id,
+              courseId: courseId, // ⭐ 核心
+            },
           });
 
           return {

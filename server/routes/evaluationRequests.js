@@ -235,6 +235,7 @@ router.post(
       // 创建新请求
       const newRequest = await EvaluationRequest.create({
         teamId,
+        courseId: team.courseId,
         requesterId,
         requesteeId: requestee_id,
         status: "pending",
@@ -265,7 +266,7 @@ router.post(
         .status(500)
         .json({ error: "Server error creating evaluation request" });
     }
-  }
+  },
 );
 
 // ✅ 我发起的请求
@@ -366,6 +367,7 @@ router.post(
       // ✅ 创建新请求
       const newRequest = await db.EvaluationRequest.create({
         teamId,
+        courseId: team.courseId,
         requesterId,
         requesteeId: requestee_id,
         status: "pending",
@@ -384,13 +386,13 @@ router.post(
     } catch (err) {
       console.error(
         "❌ Failed to create course-level evaluation request:",
-        err
+        err,
       );
       res
         .status(500)
         .json({ error: "Server error creating evaluation request." });
     }
-  }
+  },
 );
 
 // ✅ 学生请求老师给自己评价
@@ -453,6 +455,7 @@ router.post(
       // ✅ 创建新请求
       const newRequest = await db.EvaluationRequest.create({
         teamId,
+        courseId: team.courseId,
         requesterId,
         requesteeId: instructorId,
         status: "pending",
@@ -474,7 +477,7 @@ router.post(
         error: "Server error creating instructor evaluation request.",
       });
     }
-  }
+  },
 );
 
 module.exports = router;

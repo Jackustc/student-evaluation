@@ -400,6 +400,34 @@ export default function InstructorCoursePage() {
         </div>
         <div className="csv-upload-section">
           <h4 style={{ marginBottom: "8px" }}>Import Students by CSV</h4>
+          <p className="csv-subtext">
+            Upload a CSV file to bulk add students into this course.
+          </p>
+
+          <div className="csv-hint">
+            <p>
+              <strong>CSV Format Requirements:</strong>
+            </p>
+            <ul>
+              <li>
+                <b>name</b> — Student full name
+              </li>
+              <li>
+                <b>email</b> — Student email (must be unique)
+              </li>
+              <li>
+                <b>studentId</b> — Student ID
+              </li>
+            </ul>
+
+            <p>
+              <strong>Example:</strong>
+            </p>
+            <pre className="csv-example">
+              {`name,email,studentId
+Alice,alice@northeastern.edu,002021234`}
+            </pre>
+          </div>
 
           <div className="csv-upload-row">
             <input

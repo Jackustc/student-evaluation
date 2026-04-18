@@ -377,3 +377,37 @@
   font-size: 13px;
   color: #b91c1c;
 }
+
+.csv-hint {
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  padding: 14px;
+  border-radius: 10px;
+  margin-bottom: 14px;
+  font-size: 14px;
+}
+
+.csv-subtext {
+  font-size: 13px;
+  color: #6b7280;
+  margin-bottom: 6px;
+}
+
+.csv-hint strong {
+  font-size: 15px;
+}
+
+.csv-hint ul {
+  margin: 8px 0;
+  padding-left: 18px;
+}
+
+.csv-example {
+  background: #0f172a;
+  color: #e2e8f0;
+  padding: 10px 12px;
+  border-radius: 8px;
+  margin-top: 8px;
+  font-size: 13px;
+  line-height: 1.6;
+}

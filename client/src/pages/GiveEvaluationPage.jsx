@@ -33,12 +33,26 @@ export default function GiveEvaluationPage() {
         const res = await api.get(`/courses/${id}`);
         setCourse(res.data);
       } catch (err) {
-        console.error("❌ Failed to load course:", err);
-        showMessage("❌ Failed to load course.");
+        console.error("❌ Course not found or deleted", err);
+
+        // ⭐ 核心：尝试从 team 推断 course
+        try {
+          const teamRes = await api.get(`/teams/${id}`);
+          if (teamRes.data?.Course) {
+            setCourse(teamRes.data.Course);
+          } else {
+            showMessage("❌ Course not found.");
+          }
+        } catch (teamErr) {
+          console.error("❌ Failed to load team fallback:", teamErr);
+          showMessage("❌ Course not found.");
+        }
       }
     }
+
     fetchCourse();
   }, [id]);
+
   // console.log("Fetching course info for:", id);
   useEffect(() => {
     console.log("✅ course data:", course);
@@ -59,7 +73,7 @@ export default function GiveEvaluationPage() {
   }, [id]);
 
   const filtered = students.filter((s) =>
-    s.name.toLowerCase().includes(search.toLowerCase())
+    s.name.toLowerCase().includes(search.toLowerCase()),
   );
 
   const submitEvaluation = async () => {
